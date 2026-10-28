@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   THEME TOKENS
+   Values are raw RGB channels so Tailwind can apply opacity (`bg-paper/90`).
+
+   This design is DARK-FIRST and deliberate about it: the deep plum ground is
+   the identity, so it is what every visitor sees regardless of OS preference.
+   A blush light palette is kept available behind an explicit opt-in —
+   set `data-theme="light"` on <html> to switch to it.
+   =========================================================================== */
+@layer base {
+  :root {
+    --paper: 0 0 0;          /* ground stays true black     */
+    --paper-2: 20 18 20;     /* #141214 raised panels       */
+    --ink: 245 245 247;      /* cool off-white text         */
+    --ink-2: 163 160 168;    /* secondary text              */
+    --ink-3: 118 114 124;    /* captions, numerals          */
+    --accent: 250 43 85;     /* #FA2B55 crimson             */
+    --accent-2: 176 24 60;   /* #B0183C deep crimson, glows */
+    --rule: 44 38 42;        /* hairlines                   */
+    --rule-2: 28 25 28;      /* softer hairlines            */
+
+    --nav-height: 4.875rem;
+  }
+
+  /* Opt-in blush light palette */
+  :root[data-theme='light'] {
+    --paper: 252 247 245;
+    --paper-2: 246 237 238;
+    --ink: 42 34 48;
+    --ink-2: 103 90 107;
+    --ink-3: 158 143 158;
+    --accent: 192 98 135;
+    --accent-2: 140 107 177;
+    --rule: 232 216 219;
+    --rule-2: 241 231 232;
+  }
+
+  @media (max-width: 640px) {
+    :root {
+      --nav-height: 6.75rem; /* nav links wrap to a second row */
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: rgb(var(--paper)); /* no white flash before paint */
+  }
+
+  body {
+    /* The ground is painted on <html> above, NOT here. An opaque background on
+       <body> would paint over the fixed background layer: in the root stacking
+       context, in-flow block boxes paint after negative z-index descendants, so
+       body's background would bury the aurora, the rain and the wireframes. */
+    background-color: transparent;
+    @apply text-ink font-body antialiased;
+    font-size: 17px;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgb(var(--accent) / 0.3);
+    color: rgb(var(--ink));
+  }
+
+  /* Visible, consistent keyboard focus everywhere */
+  :focus-visible {
+    @apply outline-none ring-1 ring-accent ring-offset-4 ring-offset-paper rounded-[1px];
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ===========================================================================
+   COMPOSED CLASSES
+   Only for patterns repeated across components, where the utility string would
+   otherwise be copied verbatim.
+   =========================================================================== */
+@layer components {
+  /* Shared 3D context helpers — Tailwind 3 has no utilities for these. */
+  .scene {
+    perspective: 1100px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  /* The single panel surface used by every boxed element on the site:
+     near-black with a faint accent wash across the diagonal, a hairline border
+     and a deep soft shadow. Defined once so Contact, the hero log, the design
+     canvas, experience cards and project cards cannot drift apart. */
+  .glass-card {
+    @apply rounded-2xl border border-rule bg-gradient-to-br from-accent/[0.07] via-paper-2/90 to-accent-2/[0.07] shadow-[0_26px_64px_-28px_rgb(0_0_0/0.85)] backdrop-blur-md;
+  }
+
+  /* Display type at this size needs the accent to bloom slightly, or the
+     thin serif strokes disappear against the dark ground. */
+  .glow-accent {
+    text-shadow: 0 0 36px rgb(var(--accent) / 0.45);
+  }
+}
